@@ -29,8 +29,12 @@ def main(overlayed=False, pname='speedtest_auto_tests.png', truncrange=False):
         ul = []
 
         if not (starttime or stoptime):
-            tstrt = datetime.datetime.strptime(sorted(glob.glob(f'speedtest_auto_tests/{n}*'))[cutidx:][0],  # so no problems if not exist
-                                               os.path.join('speedtest_auto_tests', f'{n}_%Y-%m-%dT%H%M.json')) - HOUR_DELTA
+            if truncrange is False:
+                tstrt = datetime.datetime.strptime(sorted(glob.glob(f'speedtest_auto_tests/{n}*'))[0],  # so no problems if not exist
+                                                   os.path.join('speedtest_auto_tests', f'{n}_%Y-%m-%dT%H%M.json')) - HOUR_DELTA
+            else:
+                tstrt = datetime.datetime.strptime(sorted(glob.glob(f'speedtest_auto_tests/{n}*'))[cutidx:][0],  # so no problems if not exist
+                                                   os.path.join('speedtest_auto_tests', f'{n}_%Y-%m-%dT%H%M.json')) - HOUR_DELTA
             tstop = datetime.datetime.strptime(sorted(glob.glob(f'speedtest_auto_tests/{n}*'))[-1],
                                                os.path.join('speedtest_auto_tests', f'{n}_%Y-%m-%dT%H%M.json')) + HOUR_DELTA
 
