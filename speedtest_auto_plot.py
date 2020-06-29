@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 
+import argparse
 import datetime
 import glob
 import json
 import matplotlib.pyplot as plt
-import sys
+import os
 
 
 NAMES = ['boston', 'portland']
@@ -14,7 +15,7 @@ HOUR_DELTA = datetime.timedelta(hours=1)
 TZ_OFFSET = datetime.timedelta(hours=4)
 
 
-def main(overlayed=False, pname='speedtest_auto_tests.png'):
+def main(overlayed=False, pname='speedtest_auto_tests.png', truncrange=False):
     fig = plt.figure(figsize=(12, 8))
 
     starttime = None
@@ -27,13 +28,14 @@ def main(overlayed=False, pname='speedtest_auto_tests.png'):
 
         if not (starttime or stoptime):
             tstrt = datetime.datetime.strptime(sorted(glob.glob(f'speedtest_auto_tests/{n}*'))[0],
-                                                                    f'speedtest_auto_tests/{n}_%Y-%m-%dT%H%M.json') - HOUR_DELTA
+                                               os.path.join('speedtest_auto_tests', f'{n}_%Y-%m-%dT%H%M.json')) - HOUR_DELTA
             tstop = datetime.datetime.strptime(sorted(glob.glob(f'speedtest_auto_tests/{n}*'))[-1],
-                                                                   f'speedtest_auto_tests/{n}_%Y-%m-%dT%H%M.json') + HOUR_DELTA
+                                               os.path.join('speedtest_auto_tests', f'{n}_%Y-%m-%dT%H%M.json')) + HOUR_DELTA
 
             if (not starttime) or (tstrt < starttime):
                 starttime = tstrt
-                startday = tstrt.replace(hour=0, minute=0, second=0, microsecond=0)
+                startday = tstrt.replace(
+                    hour=0, minute=0, second=0, microsecond=0)
             if (not stoptime) or (tstop > tstop):
                 stoptime = tstop
 
@@ -45,16 +47,23 @@ def main(overlayed=False, pname='speedtest_auto_tests.png'):
             # check because can fail
             if 'download' in d.keys() and 'upload' in d.keys() and 'bandwidth' in d['download'].keys() and 'bandwidth' in d['upload'].keys():
                 if overlayed is False:
-                    t = datetime.datetime.strptime(d['timestamp'], f'%Y-%m-%dT%H:%M:%SZ') - TZ_OFFSET
+                    t = datetime.datetime.strptime(
+                        d['timestamp'], f'%Y-%m-%dT%H:%M:%SZ') - TZ_OFFSET
                 else:
-                    t = ((datetime.datetime.strptime(d['timestamp'], f'%Y-%m-%dT%H:%M:%SZ') - startday - TZ_OFFSET).total_seconds() % (60 * 60 * 24)) / (60 * 60)
+                    t = ((datetime.datetime.strptime(
+                        d['timestamp'], f'%Y-%m-%dT%H:%M:%SZ') - startday - TZ_OFFSET).total_seconds() % (60 * 60 * 24)) / (60 * 60)
                 time.append(t)
                 dl.append(d['download']['bandwidth'] / BANDWIDTH_SCALE)
                 ul.append(d['upload']['bandwidth'] / BANDWIDTH_SCALE)
 
         # plot stuff
-        plt.scatter(time, dl, label=f'{n} dl')
-        plt.scatter(time, ul, label=f'{n} ul')
+        if truncrange is False:
+            plt.scatter(time, dl, label=f'{n} dl')
+            plt.scatter(time, ul, label=f'{n} ul')
+        else:
+            cutidx = -1 * 24 * 3 * 3  # back 3 days
+            plt.scatter(time[cutidx:], dl[cutidx:], label=f'{n} dl')
+            plt.scatter(time[cutidx:], ul[cutidx:], label=f'{n} ul')
 
     plt.legend()
     if overlayed is False:
@@ -75,7 +84,15 @@ def main(overlayed=False, pname='speedtest_auto_tests.png'):
 
 
 if __name__ == '__main__':
-    if len(sys.argv) <= 1:
-        main()
-    else:
-        main(overlayed=True, pname='speedtest_auto_tests-overlayed.png')
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-o', '--overlayed', action='store_true',
+                        help='overlay selected data into 24 hour period',
+                        dest='overlayed')
+    parser.add_argument('-t', '--truncate', action='store_true',
+                        help='truncate visible data to most recent 72 hours',
+                        dest='truncrange')
+    parser.add_argument('pname', action='store', nargs='?',
+                        default='speedtest_auto_tests.png',
+                        help='filename to save speedtest plot')
+    args = parser.parse_args()
+    main(**vars(args))

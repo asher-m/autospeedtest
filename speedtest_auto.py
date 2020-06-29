@@ -17,13 +17,18 @@ WAIT = 20
 COMMAND_BOS = """speedtest -f json -s 1774"""  # 1774 is Boston Comcast
 COMMAND_POR = """speedtest -f json -s 1037"""  # 1037 is Portland Otelco
 
+
 def test(when):
     print('Testing Boston Comcast...')
-    out, err = subprocess.Popen(COMMAND_BOS.split(), stderr=subprocess.PIPE, stdout=subprocess.PIPE).communicate()
+    out, err = subprocess.Popen(COMMAND_BOS.split(),
+                                stderr=subprocess.PIPE,
+                                stdout=subprocess.PIPE).communicate()
     dump(when, out, 'boston')
 
     print('Testing Portland Otelco...')
-    out, err = subprocess.Popen(COMMAND_POR.split(), stderr=subprocess.PIPE, stdout=subprocess.PIPE).communicate()
+    out, err = subprocess.Popen(COMMAND_POR.split(),
+                                stderr=subprocess.PIPE,
+                                stdout=subprocess.PIPE).communicate()
     dump(when, out, 'portland')
 
 
