@@ -62,7 +62,8 @@ def main():
         # random waiting time
         wait_more = random.randint(0, 20 * 60)
         wait_more_td = datetime.timedelta(seconds=wait_more)
-        print(f'Waiting an additional {wait_more} seconds for random test population (until {now + wait + wait_more_td})...')
+        print(f'Waiting an additional {wait_more} seconds '
+              f'for random test population (until {now + wait + wait_more_td})...')
         time.sleep(wait_more)
 
         # if we shouldn't pause
@@ -74,6 +75,9 @@ def main():
             print('Plotting...')
             plot.main()
             plot.main(overlayed=True, pname='speedtest_auto_tests-overlayed.png')
+            plot.main(truncrange=True, pname='speedtest_auto_tests-trunced.png')
+            plot.main(overlayed=True, truncrange=True,
+                      pname='speedtest_auto_tests-overlayed-trunced.png')
 
         else:
             print('Halt file exists.  Not running test...')
