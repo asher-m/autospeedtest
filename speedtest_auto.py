@@ -26,7 +26,7 @@ def test(when):
                                 stdout=subprocess.PIPE).communicate()
     dump(when, out, 'boston')
 
-    print('Testing Portland Otelco...')
+    print('Testing Burlington Telecom...')
     out, err = subprocess.Popen(COMMAND_BUR.split(),
                                 stderr=subprocess.PIPE,
                                 stdout=subprocess.PIPE).communicate()
