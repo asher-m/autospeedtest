@@ -142,3 +142,5 @@ dmypy.json
 *.png
 *.pdf
 speedtest_auto_tests*/
+*.zip
+*.json
