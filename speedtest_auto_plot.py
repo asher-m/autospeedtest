@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 import os
 
 
-NAMES = ['boston', 'portland']
+NAMES = ['boston', 'burlington']
 # divide be 1e5 to get mbps
 BANDWIDTH_SCALE = 1e5
 HOUR_DELTA = datetime.timedelta(hours=1)

@@ -15,7 +15,8 @@ WAIT = 20
 
 # command to execute
 COMMAND_BOS = """speedtest -f json -s 1774"""  # 1774 is Boston Comcast
-COMMAND_POR = """speedtest -f json -s 1037"""  # 1037 is Portland Otelco
+# COMMAND_POR = """speedtest -f json -s 1037"""  # 1037 is Portland Otelco; no longer online
+COMMAND_BUR = """speedtest -f json -s 17193"""  # 17193 is Burlington Telecom
 
 
 def test(when):
@@ -26,10 +27,10 @@ def test(when):
     dump(when, out, 'boston')
 
     print('Testing Portland Otelco...')
-    out, err = subprocess.Popen(COMMAND_POR.split(),
+    out, err = subprocess.Popen(COMMAND_BUR.split(),
                                 stderr=subprocess.PIPE,
                                 stdout=subprocess.PIPE).communicate()
-    dump(when, out, 'portland')
+    dump(when, out, 'burlington')
 
 
 def dump(when, out, pref):
