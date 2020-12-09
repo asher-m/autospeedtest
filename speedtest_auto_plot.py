@@ -6,13 +6,16 @@ import glob
 import json
 import matplotlib.pyplot as plt
 import os
+import time
 
 
 NAMES = ['boston', 'burlington']
 # divide be 1e5 to get mbps
 BANDWIDTH_SCALE = 1e5
 HOUR_DELTA = datetime.timedelta(hours=1)
-TZ_OFFSET = datetime.timedelta(hours=4)
+# Not awesome, but we need UTC offset:
+TZ_OFFSET = datetime.datetime.fromtimestamp(time.mktime(
+    time.localtime())) - datetime.datetime.fromtimestamp(time.mktime(time.gmtime()))
 
 
 def main(overlayed=False, pname='speedtest_auto_tests.png', truncrange=False):
@@ -30,13 +33,20 @@ def main(overlayed=False, pname='speedtest_auto_tests.png', truncrange=False):
 
         if not (starttime or stoptime):
             if truncrange is False:
-                tstrt = datetime.datetime.strptime(sorted(glob.glob(f'speedtest_auto_tests/{n}*'))[0],  # so no problems if not exist
-                                                   os.path.join('speedtest_auto_tests', f'{n}_%Y-%m-%dT%H%M.json')) - HOUR_DELTA
+                fname_strt = sorted(glob.glob(f'speedtest_auto_tests/{n}*'))[0]
             else:
-                tstrt = datetime.datetime.strptime(sorted(glob.glob(f'speedtest_auto_tests/{n}*'))[cutidx:][0],  # so no problems if not exist
-                                                   os.path.join('speedtest_auto_tests', f'{n}_%Y-%m-%dT%H%M.json')) - HOUR_DELTA
-            tstop = datetime.datetime.strptime(sorted(glob.glob(f'speedtest_auto_tests/{n}*'))[-1],
-                                               os.path.join('speedtest_auto_tests', f'{n}_%Y-%m-%dT%H%M.json')) + HOUR_DELTA
+                fname_strt = sorted(
+                    glob.glob(f'speedtest_auto_tests/{n}*'))[cutidx:][0]
+            with open(fname_strt, 'r') as fp:
+                d = json.load(fp)
+            tstrt = datetime.datetime.strptime(
+                d['timestamp'], f'%Y-%m-%dT%H:%M:%SZ') - HOUR_DELTA + TZ_OFFSET
+
+            fname_tstop = sorted(glob.glob(f'speedtest_auto_tests/{n}*'))[-1]
+            with open(fname_tstop, 'r') as fp:
+                d = json.load(fp)
+            tstop = datetime.datetime.strptime(
+                d['timestamp'], f'%Y-%m-%dT%H:%M:%SZ') + HOUR_DELTA + TZ_OFFSET
 
             if (not starttime) or (tstrt < starttime):
                 starttime = tstrt
@@ -54,10 +64,10 @@ def main(overlayed=False, pname='speedtest_auto_tests.png', truncrange=False):
             if 'download' in d.keys() and 'upload' in d.keys() and 'bandwidth' in d['download'].keys() and 'bandwidth' in d['upload'].keys():
                 if overlayed is False:
                     t = datetime.datetime.strptime(
-                        d['timestamp'], f'%Y-%m-%dT%H:%M:%SZ') - TZ_OFFSET
+                        d['timestamp'], f'%Y-%m-%dT%H:%M:%SZ') + TZ_OFFSET
                 else:
                     t = ((datetime.datetime.strptime(
-                        d['timestamp'], f'%Y-%m-%dT%H:%M:%SZ') - startday - TZ_OFFSET).total_seconds() % (60 * 60 * 24)) / (60 * 60)
+                        d['timestamp'], f'%Y-%m-%dT%H:%M:%SZ') - startday + TZ_OFFSET).total_seconds() % (60 * 60 * 24)) / (60 * 60)
                 time.append(t)
                 dl.append(d['download']['bandwidth'] / BANDWIDTH_SCALE)
                 ul.append(d['upload']['bandwidth'] / BANDWIDTH_SCALE)
@@ -72,10 +82,10 @@ def main(overlayed=False, pname='speedtest_auto_tests.png', truncrange=False):
 
     plt.legend()
     if overlayed is False:
-        plt.xlabel('Time (MM-DD HH)')
+        plt.xlabel('UTC Time (MM-DD HH)')
         plt.xlim(starttime, stoptime)
     else:
-        plt.xlabel('Time of Day (Hour)')
+        plt.xlabel('UTC Time of Day (Hour)')
         plt.xlim(0, 24)
         plt.gca().set_xticks(range(25))
     plt.ylabel('Throughput (mbps)')
