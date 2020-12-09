@@ -42,7 +42,7 @@ def main(overlayed=False, pname='speedtest_auto_tests.png', truncrange=False):
                 starttime = tstrt
                 startday = tstrt.replace(
                     hour=0, minute=0, second=0, microsecond=0)
-            if (not stoptime) or (tstop > tstop):
+            if (not stoptime) or (tstop > stoptime):
                 stoptime = tstop
 
         # grab files and append
