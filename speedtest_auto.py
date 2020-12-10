@@ -10,27 +10,21 @@ import time
 import speedtest_auto_plot as plot
 
 
-# time to wait in minutes
-WAIT = 20
-
-# command to execute
-COMMAND_BOS = """speedtest -f json -s 1774"""  # 1774 is Boston Comcast
-# COMMAND_POR = """speedtest -f json -s 1037"""  # 1037 is Portland Otelco; no longer online
-COMMAND_BUR = """speedtest -f json -s 17193"""  # 17193 is Burlington Telecom
+# periodicity of tests in minutes
+PERIOD = 20
+COMMAND_PROTO = r"speedtest -f json -s {}"
+SITES = {
+    1774: 'Boston Comcast',
+    17193: 'Burlington Telecom'
+}
 
 
 def test(when):
-    print('Testing Boston Comcast...')
-    out, err = subprocess.Popen(COMMAND_BOS.split(),
-                                stderr=subprocess.PIPE,
-                                stdout=subprocess.PIPE).communicate()
-    dump(when, out, 'boston')
-
-    print('Testing Burlington Telecom...')
-    out, err = subprocess.Popen(COMMAND_BUR.split(),
-                                stderr=subprocess.PIPE,
-                                stdout=subprocess.PIPE).communicate()
-    dump(when, out, 'burlington')
+    for s in SITES:
+        out, _ = subprocess.Popen(COMMAND_PROTO.format(s).split(),
+                                  stderr=subprocess.PIPE,
+                                  stdout=subprocess.PIPE).communicate()
+        dump(when, out, s)
 
 
 def dump(when, out, pref):
@@ -45,7 +39,7 @@ def dump(when, out, pref):
 def main():
     now = datetime.datetime.now()
     today = now.replace(hour=0, minute=0, second=0, microsecond=0)
-    wait_delta = datetime.timedelta(minutes=WAIT)
+    wait_delta = datetime.timedelta(minutes=PERIOD)
 
     # start with a test
     test(now)

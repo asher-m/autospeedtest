@@ -8,8 +8,8 @@ import matplotlib.pyplot as plt
 import os
 import time
 
+from speedtest_auto import SITES
 
-NAMES = ['boston', 'burlington']
 # divide be 1e5 to get mbps
 BANDWIDTH_SCALE = 1e5
 HOUR_DELTA = datetime.timedelta(hours=1)
@@ -19,30 +19,30 @@ TZ_OFFSET = datetime.datetime.fromtimestamp(time.mktime(
 
 
 def main(overlayed=False, pname='speedtest_auto_tests.png', truncrange=False):
-    fig = plt.figure(figsize=(12, 8))
+    plt.figure(figsize=(12, 8))
 
     starttime = None
     stoptime = None
 
     cutidx = -1 * 24 * 3 * 3  # back 3 days
 
-    for n in NAMES:
+    for s in SITES:
         time = []
         dl = []
         ul = []
 
         if not (starttime or stoptime):
             if truncrange is False:
-                fname_strt = sorted(glob.glob(f'speedtest_auto_tests/{n}*'))[0]
+                fname_strt = sorted(glob.glob(f'speedtest_auto_tests/{s}*'))[0]
             else:
                 fname_strt = sorted(
-                    glob.glob(f'speedtest_auto_tests/{n}*'))[cutidx:][0]
+                    glob.glob(f'speedtest_auto_tests/{s}*'))[cutidx:][0]
             with open(fname_strt, 'r') as fp:
                 d = json.load(fp)
             tstrt = datetime.datetime.strptime(
                 d['timestamp'], f'%Y-%m-%dT%H:%M:%SZ') - HOUR_DELTA + TZ_OFFSET
 
-            fname_tstop = sorted(glob.glob(f'speedtest_auto_tests/{n}*'))[-1]
+            fname_tstop = sorted(glob.glob(f'speedtest_auto_tests/{s}*'))[-1]
             with open(fname_tstop, 'r') as fp:
                 d = json.load(fp)
             tstop = datetime.datetime.strptime(
@@ -56,7 +56,7 @@ def main(overlayed=False, pname='speedtest_auto_tests.png', truncrange=False):
                 stoptime = tstop
 
         # grab files and append
-        for f in sorted(glob.glob(f'speedtest_auto_tests/{n}*')):
+        for f in sorted(glob.glob(f'speedtest_auto_tests/{s}*')):
             with open(f, 'r') as fp:
                 d = json.load(fp)
 
@@ -74,11 +74,11 @@ def main(overlayed=False, pname='speedtest_auto_tests.png', truncrange=False):
 
         # plot stuff
         if truncrange is False:
-            plt.scatter(time, dl, label=f'{n} dl')
-            plt.scatter(time, ul, label=f'{n} ul')
+            plt.scatter(time, dl, label=f'{SITES[s]} dl')
+            plt.scatter(time, ul, label=f'{SITES[s]} ul')
         else:
-            plt.scatter(time[cutidx:], dl[cutidx:], label=f'{n} dl')
-            plt.scatter(time[cutidx:], ul[cutidx:], label=f'{n} ul')
+            plt.scatter(time[cutidx:], dl[cutidx:], label=f'{SITES[s]} dl')
+            plt.scatter(time[cutidx:], ul[cutidx:], label=f'{SITES[s]} ul')
 
     plt.legend()
     if overlayed is False:
