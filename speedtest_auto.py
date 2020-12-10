@@ -200,8 +200,8 @@ def plot_ping(overlayed=False, trunced=False, pname='speedtest_auto_latency_test
 
         # plot latency
         ax1.scatter(
-            tests_site['date'],
-            tests_site['latency'],
+            tests_site['date'][cutidx:],
+            tests_site['latency'][cutidx:],
             color=colors_latency[j],
             label=f'{SITES[s]} latency'
         )
@@ -209,8 +209,8 @@ def plot_ping(overlayed=False, trunced=False, pname='speedtest_auto_latency_test
         # plot packetloss
         if not np.all(np.isnan(tests_site['packetloss'])):
             ax2.scatter(
-                tests_site['date'],
-                tests_site['packetloss'],
+                tests_site['date'][cutidx:],
+                tests_site['packetloss'][cutidx:],
                 color=colors_packetloss[j],
                 label=f'{SITES[s]} packetloss'
             )
