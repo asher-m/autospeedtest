@@ -210,11 +210,11 @@ if __name__ == '__main__':
                         default='speedtest_auto_tests.png',
                         help='filename to save speedtest plot')
     kwargs = vars(parser.parse_args())
-    if 'plot' in kwargs:
+    if kwargs['plot'] is True:
         kwargs.pop('plot')
         kwargs.pop('test')
         plot(**kwargs)
-    elif 'test' in kwargs:
+    elif kwargs['test'] is True:
         test()
     else:
         main()
