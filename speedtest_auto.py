@@ -65,7 +65,7 @@ def dump(site, rawout, timestamp=None):
     CONN.commit()
 
 
-def plot(overlayed=False, trunced=False, pname='speedtest_auto_tests.png'):
+def plot_bandwidth(overlayed=False, trunced=False, pname='speedtest_auto_tests.png'):
     # make figure
     plt.figure(figsize=(12, 8))
     # open db and read
@@ -73,14 +73,14 @@ def plot(overlayed=False, trunced=False, pname='speedtest_auto_tests.png'):
     cur.execute('SELECT date, site, dl_bandwidth, ul_bandwidth FROM tests')
     tests_strdate = np.array(
         cur.fetchall(),
-        dtype=[('date', 'U64'), ('site', int), ('dl', int), ('ul', int)]
+        dtype=[('date', 'U64'), ('site', int), ('dl', float), ('ul', float)]
     )
 
     # convert to dated
     data = [(datetime.datetime.strptime(t, DATEFORMAT), s, dl, ul)
             for t, s, dl, ul in tests_strdate]
     dtype = [('date', datetime.datetime),
-             ('site', int), ('dl', int), ('ul', int)]
+             ('site', int), ('dl', float), ('ul', float)]
     # make array
     tests = np.sort(np.array(data, dtype=dtype), order='date')
 
@@ -145,6 +145,121 @@ def plot(overlayed=False, trunced=False, pname='speedtest_auto_tests.png'):
     plt.close()
 
 
+def plot_ping(overlayed=False, trunced=False, pname='speedtest_auto_latency_tests.png'):
+    colors_latency = ['blue', 'green']
+    colors_packetloss = ['red', 'orange']
+    # make figure
+    _, axes = plt.subplots(2, 1, figsize=(12, 8), sharex=True)
+    ax1, ax2 = axes
+    # open db and read
+    cur = CONN.cursor()
+    cur.execute('SELECT date, site, packetloss, latency, jitter FROM tests')
+    tests_strdate = np.array(
+        cur.fetchall(),
+        dtype=[('date', 'U64'), ('site', int), ('packetloss', float),
+               ('latency', float), ('jitter', float)]
+    )
+
+    # convert to dated
+    data = [(datetime.datetime.strptime(t, DATEFORMAT), s, p, l, j)
+            for t, s, p, l, j in tests_strdate]
+    dtype = [('date', datetime.datetime), ('site', int), ('packetloss', float),
+             ('latency', float), ('jitter', float)]
+    # make array
+    tests = np.sort(np.array(data, dtype=dtype), order='date')
+
+    for j, s in enumerate(SITES):
+        # get site data
+        tests_site = tests[tests['site'] == s]
+        # skip if no data for site
+        if len(tests_site) < 1:
+            continue
+
+        # if trunced
+        if trunced is True:
+            # get plot index
+            cutidx = np.searchsorted(
+                tests_site['date'],
+                tests_site['date'][-1] - datetime.timedelta(days=3)
+            )
+        else:
+            cutidx = 0
+
+        # get startday for overlayed datetime modulus
+        if overlayed is True:
+            startday = datetime.datetime.combine(
+                tests_site['date'][cutidx].date(),
+                datetime.time()
+            )
+            tests_site['date'] = [((t - startday).total_seconds() % (60 * 60 * 24))
+                                  / (60 * 60) for t in tests_site['date']]  # not great with typing, but works
+
+        # plot latency
+        ax1.scatter(
+            tests_site['date'],
+            tests_site['latency'],
+            color=colors_latency[j],
+            label=f'{SITES[s]} latency'
+        )
+
+        # plot packetloss
+        if not np.all(np.isnan(tests_site['packetloss'])):
+            ax2.scatter(
+                tests_site['date'],
+                tests_site['packetloss'],
+                color=colors_packetloss[j],
+                label=f'{SITES[s]} packetloss'
+            )
+
+    # plot start/stop time
+    strttime = np.min(tests['date']) - HOUR_DELTA
+    stoptime = np.max(tests['date']) + HOUR_DELTA
+
+    # finish plot
+    ax1.legend(loc=2)
+    ax1.set_ylabel('Ping (ms)')
+    ax1.set_ylim(bottom=0)
+    ax1.grid(True)
+    ax2.legend(loc=2)
+    ax2.set_ylabel('Packetloss (percentage)')
+    ax2.set_ylim(bottom=0)
+    ax2.grid(True)
+
+    if overlayed is False:
+        ax2.set_xlabel('UTC Time (MM-DD HH)')
+        ax2.set_xlim(strttime, stoptime)
+    else:
+        ax2.set_xlabel('UTC Time of Day (Hour)')
+        ax2.set_xlim(0, 24)
+        ax2.set_xticks(range(25))
+
+    plt.tight_layout()
+    plt.savefig(pname)
+    plt.close()
+
+
+def do_plots():
+    # plot
+    print('Plotting...')
+
+    # regular plots
+    plot_bandwidth()
+    plot_bandwidth(overlayed=True,
+         pname='speedtest_auto_tests-overlayed.png')
+    plot_bandwidth(trunced=True,
+         pname='speedtest_auto_tests-trunced.png')
+    plot_bandwidth(overlayed=True, trunced=True,
+         pname='speedtest_auto_tests-overlayed-trunced.png')
+
+    # latency plots
+    plot_ping()
+    plot_ping(overlayed=True,
+        pname='speedtest_auto_latency_tests-overlayed.png')
+    plot_ping(trunced=True,
+        pname='speedtest_auto_latency_tests-trunced.png')
+    plot_ping(overlayed=True, trunced=True,
+        pname='speedtest_auto_latency_tests-overlayed-trunced.png')
+
 def main():
     now = datetime.datetime.now()
     today = now.replace(hour=0, minute=0, second=0, microsecond=0)
@@ -152,6 +267,7 @@ def main():
 
     # start with a test
     test()
+    do_plots()
 
     # then start testing repeatedly
     while True:
@@ -175,13 +291,8 @@ def main():
             # do the tests again
             test()
 
-            # plot
-            print('Plotting...')
-            plot()
-            plot(overlayed=True, pname='speedtest_auto_tests-overlayed.png')
-            plot(trunced=True, pname='speedtest_auto_tests-trunced.png')
-            plot(overlayed=True, trunced=True,
-                 pname='speedtest_auto_tests-overlayed-trunced.png')
+            # do plots
+            do_plots()
 
         else:
             print('Halt file exists.  Not running test...')
@@ -196,24 +307,13 @@ if __name__ == '__main__':
         ' used to run one-off tests or plot.\n\nAny arguments are ignored if neither'
         'a one-off test or plot are indicated.'
     )
-    parser.add_argument('-d', '--test', action='store_true',
+    parser.add_argument('-t', '--test', action='store_true',
                         help='run a one-off test', dest='test')
     parser.add_argument('-p', '--plot', action='store_true',
                         help='make plots then close', dest='plot')
-    parser.add_argument('-o', '--overlayed', action='store_true',
-                        help='overlay selected data into 24 hour period',
-                        dest='overlayed')
-    parser.add_argument('-t', '--truncate', action='store_true',
-                        help='truncate visible data to most recent 72 hours',
-                        dest='trunced')
-    parser.add_argument('pname', action='store', nargs='?',
-                        default='speedtest_auto_tests.png',
-                        help='filename to save speedtest plot')
     kwargs = vars(parser.parse_args())
     if kwargs['plot'] is True:
-        kwargs.pop('plot')
-        kwargs.pop('test')
-        plot(**kwargs)
+        do_plots()
     elif kwargs['test'] is True:
         test()
     else:
