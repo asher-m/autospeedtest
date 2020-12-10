@@ -123,8 +123,12 @@ def plot_bandwidth(overlayed=False, trunced=False, pname='speedtest_auto_bandwid
         )
 
     # plot start/stop time
-    strttime = np.min(tests['date']) - HOUR_DELTA
-    stoptime = np.max(tests['date']) + HOUR_DELTA
+    if trunced:
+        strtidx = np.searchsorted(tests['date'], tests['date'][-1] - datetime.timedelta(days=3))
+    else:
+        strtidx = 0
+    strttime = tests['date'][strtidx] - HOUR_DELTA
+    stoptime = tests['date'][-1] + HOUR_DELTA
 
     # finish plot
     plt.legend(loc=2)
@@ -212,8 +216,12 @@ def plot_ping(overlayed=False, trunced=False, pname='speedtest_auto_latency_test
             )
 
     # plot start/stop time
-    strttime = np.min(tests['date']) - HOUR_DELTA
-    stoptime = np.max(tests['date']) + HOUR_DELTA
+    if trunced:
+        strtidx = np.searchsorted(tests['date'], tests['date'][-1] - datetime.timedelta(days=3))
+    else:
+        strtidx = 0
+    strttime = tests['date'][strtidx] - HOUR_DELTA
+    stoptime = tests['date'][-1] + HOUR_DELTA
 
     # finish plot
     ax1.legend(loc=2)
