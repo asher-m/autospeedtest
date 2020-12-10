@@ -65,7 +65,7 @@ def dump(site, rawout, timestamp=None):
     CONN.commit()
 
 
-def plot_bandwidth(overlayed=False, trunced=False, pname='speedtest_auto_tests.png'):
+def plot_bandwidth(overlayed=False, trunced=False, pname='speedtest_auto_bandwidth_tests.png'):
     # make figure
     plt.figure(figsize=(12, 8))
     # open db and read
@@ -245,11 +245,11 @@ def do_plots():
     # regular plots
     plot_bandwidth()
     plot_bandwidth(overlayed=True,
-         pname='speedtest_auto_tests-overlayed.png')
+         pname='speedtest_auto_bandwidth_tests-overlayed.png')
     plot_bandwidth(trunced=True,
-         pname='speedtest_auto_tests-trunced.png')
+         pname='speedtest_auto_bandwidth_tests-trunced.png')
     plot_bandwidth(overlayed=True, trunced=True,
-         pname='speedtest_auto_tests-overlayed-trunced.png')
+         pname='speedtest_auto_bandwidth_tests-overlayed-trunced.png')
 
     # latency plots
     plot_ping()
