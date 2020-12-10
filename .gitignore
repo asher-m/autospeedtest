@@ -145,3 +145,4 @@ speedtest_auto_tests*/
 *.zip
 *.json
 *.back
+*.db
