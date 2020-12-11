@@ -38,10 +38,10 @@ DATEFORMAT = "%Y-%m-%dT%H-%M-%S"
 def test():
     for s in SITES:
         print(f'Testing {SITES[s]}...')
-        out, _ = subprocess.Popen(COMMAND_PROTO.format(s).split(),
+        out, err = subprocess.Popen(COMMAND_PROTO.format(s).split(),
                                   stderr=subprocess.PIPE,
                                   stdout=subprocess.PIPE).communicate()
-        dump(s, out)
+        dump(s, out) if len(out) > 0 else dump(s, err)
 
 
 def dump(site, rawout, timestamp=None):
@@ -49,6 +49,7 @@ def dump(site, rawout, timestamp=None):
         assert isinstance(timestamp, datetime.datetime)
     else:
         timestamp = datetime.datetime.now()
+
     result = json.loads(rawout)
     data = (
         timestamp.strftime(DATEFORMAT),
