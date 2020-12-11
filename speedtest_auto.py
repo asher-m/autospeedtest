@@ -113,16 +113,18 @@ def plot_bandwidth(overlayed=False, trunced=False, pname='speedtest_auto_bandwid
                                   / (60 * 60) for t in tests_site['date']]  # not great with typing, but works
 
         # plot
-        plt.scatter(
-            tests_site['date'][cutidx:],
-            tests_site['dl'][cutidx:] / BANDWIDTH_SCALE,
-            label=f'{SITES[s]} dl'
-        )
-        plt.scatter(
-            tests_site['date'][cutidx:],
-            tests_site['ul'][cutidx:] / BANDWIDTH_SCALE,
-            label=f'{SITES[s]} ul'
-        )
+        if not np.all(np.isnan(tests_site['dl'][cutidx:])):
+            plt.scatter(
+                tests_site['date'][cutidx:],
+                tests_site['dl'][cutidx:] / BANDWIDTH_SCALE,
+                label=f'{SITES[s]} dl'
+            )
+        if not np.all(np.isnan(tests_site['ul'][cutidx:])):
+            plt.scatter(
+                tests_site['date'][cutidx:],
+                tests_site['ul'][cutidx:] / BANDWIDTH_SCALE,
+                label=f'{SITES[s]} ul'
+            )
 
     # plot start/stop time
     if trunced:
@@ -199,14 +201,15 @@ def plot_ping(overlayed=False, trunced=False, pname='speedtest_auto_latency_test
                                   / (60 * 60) for t in tests_site['date']]  # not great with typing, but works
 
         # plot latency
-        ax1.scatter(
-            tests_site['date'][cutidx:],
-            tests_site['latency'][cutidx:],
-            label=f'{SITES[s]} latency'
-        )
+        if not np.all(np.isnan(tests_site['latency'][cutidx:])):
+            ax1.scatter(
+                tests_site['date'][cutidx:],
+                tests_site['latency'][cutidx:],
+                label=f'{SITES[s]} latency'
+            )
 
         # plot packetloss
-        if not np.all(np.isnan(tests_site['packetloss'])):
+        if not np.all(np.isnan(tests_site['packetloss'][cutidx:])):
             ax2.scatter(
                 tests_site['date'][cutidx:],
                 tests_site['packetloss'][cutidx:],
