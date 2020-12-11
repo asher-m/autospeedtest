@@ -9,6 +9,7 @@ import os
 import random
 import sqlite3
 import subprocess
+import tempfile
 import time
 
 
@@ -42,23 +43,37 @@ def get_site_name(s):
 def test():
     for s in SITES:
         print(f'Testing {get_site_name(s)}...')
-        out, err = subprocess.Popen(COMMAND_PROTO.format(s).split(),
-                                    stderr=subprocess.PIPE,
-                                    stdout=subprocess.PIPE).communicate()
-        dump(s, out) if len(out) > 0 else dump(s, err)
+        try:
+            # use tempfile because subprocess.PIPE has a limitted buffer
+            ftemp = tempfile.TemporaryFile()
+            subprocess.Popen(
+                COMMAND_PROTO.format(s).split(),
+                stdout=ftemp,
+                stderr=ftemp
+            ).communicate()
+            # handle file
+            ftemp.seek(0)
+            result_as_str = ftemp.read().decode('utf-8').strip()
+            dump(s, result_as_str)
+        except Exception as e:
+            print(f'There was a problem when testing {SITES[s]} at'
+                  f' {datetime.datetime.now().strftime(DATEFORMAT)}:'
+                  f'\n\t{type(e).__module__}.{type(e).__name__}: {str(e)}')
 
 
-def dump(site, rawout, timestamp=None):
+def dump(site, result_as_str, timestamp=None):
+    # get timestamp
     if timestamp:
         assert isinstance(timestamp, datetime.datetime)
     else:
         timestamp = datetime.datetime.now()
-
-    result = json.loads(rawout)
+    # get result
+    result = json.loads(result_as_str)
+    # assemble data
     data = (
         timestamp.strftime(DATEFORMAT),
         site,
-        rawout,
+        result_as_str,
         result['ping']['latency'] if 'ping' in result and 'latency' in result['ping'] else None,
         result['ping']['jitter'] if 'ping' in result and 'jitter' in result['ping'] else None,
         result['download']['bandwidth'] if 'download' in result and 'bandwidth' in result['download'] else None,
@@ -89,7 +104,7 @@ def plot_bandwidth(overlayed=False, trunced=False, pname='speedtest_auto_bandwid
              ('site', int), ('dl', float), ('ul', float)]
     # make array
     tests = np.sort(np.array(data, dtype=dtype), order='date')
-    
+
     for s in np.unique(tests['site']):
         # get site data
         tests_site = tests[tests['site'] == s]
