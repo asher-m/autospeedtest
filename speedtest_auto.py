@@ -22,6 +22,7 @@ CONN = sqlite3.connect('speedtests.db')
 PERIOD = 20  # periodicity of tests in minutes
 COMMAND_PROTO = r"speedtest -f json -s {}"  # test command prototype
 SITES = {  # sites to test
+    1037: 'Portland Otelco',
     1774: 'Boston Comcast',
     17193: 'Burlington Telecom'
 }
