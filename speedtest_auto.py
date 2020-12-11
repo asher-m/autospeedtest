@@ -22,7 +22,7 @@ CONN = sqlite3.connect('speedtests.db')
 PERIOD = 20  # periodicity of tests in minutes
 COMMAND_PROTO = r"speedtest -f json -s {}"  # test command prototype
 SITES = {  # sites to test
-    1037: 'Portland Otelco',
+    # 1037: 'Portland Otelco',
     1774: 'Boston Comcast',
     17193: 'Burlington Telecom'
 }
@@ -35,12 +35,16 @@ HOUR_DELTA = datetime.timedelta(hours=1)
 DATEFORMAT = "%Y-%m-%dT%H-%M-%S"
 
 
+def get_site_name(s):
+    return SITES[s] if s in SITES else f'serverid {s}'
+
+
 def test():
     for s in SITES:
-        print(f'Testing {SITES[s]}...')
+        print(f'Testing {get_site_name(s)}...')
         out, err = subprocess.Popen(COMMAND_PROTO.format(s).split(),
-                                  stderr=subprocess.PIPE,
-                                  stdout=subprocess.PIPE).communicate()
+                                    stderr=subprocess.PIPE,
+                                    stdout=subprocess.PIPE).communicate()
         dump(s, out) if len(out) > 0 else dump(s, err)
 
 
@@ -85,8 +89,8 @@ def plot_bandwidth(overlayed=False, trunced=False, pname='speedtest_auto_bandwid
              ('site', int), ('dl', float), ('ul', float)]
     # make array
     tests = np.sort(np.array(data, dtype=dtype), order='date')
-
-    for s in SITES:
+    
+    for s in np.unique(tests['site']):
         # get site data
         tests_site = tests[tests['site'] == s]
         # skip if no data for site
@@ -117,18 +121,19 @@ def plot_bandwidth(overlayed=False, trunced=False, pname='speedtest_auto_bandwid
             plt.scatter(
                 tests_site['date'][cutidx:],
                 tests_site['dl'][cutidx:] / BANDWIDTH_SCALE,
-                label=f'{SITES[s]} dl'
+                label=f'{get_site_name(s)} dl'
             )
         if not np.all(np.isnan(tests_site['ul'][cutidx:])):
             plt.scatter(
                 tests_site['date'][cutidx:],
                 tests_site['ul'][cutidx:] / BANDWIDTH_SCALE,
-                label=f'{SITES[s]} ul'
+                label=f'{get_site_name(s)} ul'
             )
 
     # plot start/stop time
     if trunced:
-        strtidx = np.searchsorted(tests['date'], tests['date'][-1] - datetime.timedelta(days=3))
+        strtidx = np.searchsorted(
+            tests['date'], tests['date'][-1] - datetime.timedelta(days=3))
     else:
         strtidx = 0
     strttime = tests['date'][strtidx] - HOUR_DELTA
@@ -174,7 +179,7 @@ def plot_ping(overlayed=False, trunced=False, pname='speedtest_auto_latency_test
     # make array
     tests = np.sort(np.array(data, dtype=dtype), order='date')
 
-    for j, s in enumerate(SITES):
+    for s in np.unique(tests['site']):
         # get site data
         tests_site = tests[tests['site'] == s]
         # skip if no data for site
@@ -205,7 +210,7 @@ def plot_ping(overlayed=False, trunced=False, pname='speedtest_auto_latency_test
             ax1.scatter(
                 tests_site['date'][cutidx:],
                 tests_site['latency'][cutidx:],
-                label=f'{SITES[s]} latency'
+                label=f'{get_site_name(s)} latency'
             )
 
         # plot packetloss
@@ -213,12 +218,13 @@ def plot_ping(overlayed=False, trunced=False, pname='speedtest_auto_latency_test
             ax2.scatter(
                 tests_site['date'][cutidx:],
                 tests_site['packetloss'][cutidx:],
-                label=f'{SITES[s]} packetloss'
+                label=f'{get_site_name(s)} packetloss'
             )
 
     # plot start/stop time
     if trunced:
-        strtidx = np.searchsorted(tests['date'], tests['date'][-1] - datetime.timedelta(days=3))
+        strtidx = np.searchsorted(
+            tests['date'], tests['date'][-1] - datetime.timedelta(days=3))
     else:
         strtidx = 0
     strttime = tests['date'][strtidx] - HOUR_DELTA
@@ -254,20 +260,21 @@ def do_plots():
     # regular plots
     plot_bandwidth()
     plot_bandwidth(overlayed=True,
-         pname='speedtest_auto_bandwidth_tests-overlayed.png')
+                   pname='speedtest_auto_bandwidth_tests-overlayed.png')
     plot_bandwidth(trunced=True,
-         pname='speedtest_auto_bandwidth_tests-trunced.png')
+                   pname='speedtest_auto_bandwidth_tests-trunced.png')
     plot_bandwidth(overlayed=True, trunced=True,
-         pname='speedtest_auto_bandwidth_tests-overlayed-trunced.png')
+                   pname='speedtest_auto_bandwidth_tests-overlayed-trunced.png')
 
     # latency plots
     plot_ping()
     plot_ping(overlayed=True,
-        pname='speedtest_auto_latency_tests-overlayed.png')
+              pname='speedtest_auto_latency_tests-overlayed.png')
     plot_ping(trunced=True,
-        pname='speedtest_auto_latency_tests-trunced.png')
+              pname='speedtest_auto_latency_tests-trunced.png')
     plot_ping(overlayed=True, trunced=True,
-        pname='speedtest_auto_latency_tests-overlayed-trunced.png')
+              pname='speedtest_auto_latency_tests-overlayed-trunced.png')
+
 
 def main():
     now = datetime.datetime.now()
