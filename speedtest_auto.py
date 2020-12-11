@@ -150,8 +150,6 @@ def plot_bandwidth(overlayed=False, trunced=False, pname='speedtest_auto_bandwid
 
 
 def plot_ping(overlayed=False, trunced=False, pname='speedtest_auto_latency_tests.png'):
-    colors_latency = ['blue', 'green']
-    colors_packetloss = ['red', 'orange']
     # make figure
     _, axes = plt.subplots(2, 1, figsize=(12, 8), sharex=True)
     ax1, ax2 = axes
@@ -202,7 +200,6 @@ def plot_ping(overlayed=False, trunced=False, pname='speedtest_auto_latency_test
         ax1.scatter(
             tests_site['date'][cutidx:],
             tests_site['latency'][cutidx:],
-            color=colors_latency[j],
             label=f'{SITES[s]} latency'
         )
 
@@ -211,7 +208,6 @@ def plot_ping(overlayed=False, trunced=False, pname='speedtest_auto_latency_test
             ax2.scatter(
                 tests_site['date'][cutidx:],
                 tests_site['packetloss'][cutidx:],
-                color=colors_packetloss[j],
                 label=f'{SITES[s]} packetloss'
             )
 
