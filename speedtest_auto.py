@@ -292,6 +292,7 @@ def do_plots():
 
 
 def main():
+    halted = None
     now = datetime.datetime.now()
     today = now.replace(hour=0, minute=0, second=0, microsecond=0)
     wait_delta = datetime.timedelta(minutes=PERIOD)
@@ -318,16 +319,18 @@ def main():
         time.sleep(wait_more)
 
         # if we shouldn't pause
-        if not os.path.exists('speedtest_auto_tests/halt'):
+        if not os.path.exists('./halt'):
             # do the tests again
             test()
-
-            # do plots
             do_plots()
-
         else:
             print('Halt file exists.  Not running test...')
+            if not halted:
+                halted = datetime.datetime.now()  # so we know when to delete the halt file
             time.sleep(3)
+            if datetime.datetime.now() - halted > datetime.timedelta(hours=3):
+                halted = None
+                os.remove('./halt')
 
 
 if __name__ == '__main__':
