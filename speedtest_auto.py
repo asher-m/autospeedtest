@@ -9,7 +9,6 @@ import os
 import random
 import sqlite3
 import subprocess
-import tempfile
 import time
 
 
@@ -44,17 +43,14 @@ def test():
     for s in SITES:
         print(f'Testing {get_site_name(s)}...')
         try:
-            # use tempfile because subprocess.PIPE has a limitted buffer
-            ftemp = tempfile.TemporaryFile()
-            subprocess.Popen(
+            out, _ = subprocess.Popen(
                 COMMAND_PROTO.format(s).split(),
-                stdout=ftemp,
-                stderr=ftemp
-            ).communicate()
-            # handle file
-            ftemp.seek(0)
-            result_as_str = ftemp.read().decode('utf-8').strip()
-            dump(s, result_as_str)
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE
+            ).communicate(
+                timeout=60  # timeout after 60 seconds
+            )
+            dump(s, out)
         except Exception as e:
             print(f'There was a problem when testing {SITES[s]} at'
                   f' {datetime.datetime.now().strftime(DATEFORMAT)}:'
