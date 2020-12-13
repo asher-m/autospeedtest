@@ -82,7 +82,7 @@ def dump(site, result_as_str, timestamp=None):
     CONN.commit()
 
 
-def plot_bandwidth(overlayed=False, trunced=False, pname='speedtest_auto_bandwidth_tests.png'):
+def plot_bandwidth(pname, overlayed=False, trunced=False):
     # make figure
     plt.figure(figsize=(12, 8))
     # open db and read
@@ -169,7 +169,7 @@ def plot_bandwidth(overlayed=False, trunced=False, pname='speedtest_auto_bandwid
     plt.close()
 
 
-def plot_ping(overlayed=False, trunced=False, pname='speedtest_auto_latency_tests.png'):
+def plot_ping(pname, overlayed=False, trunced=False):
     # make figure
     _, axes = plt.subplots(2, 1, figsize=(12, 8), sharex=True)
     ax1, ax2 = axes
@@ -269,22 +269,16 @@ def do_plots():
     print('Plotting...')
 
     # regular plots
-    plot_bandwidth()
-    plot_bandwidth(overlayed=True,
-                   pname='speedtest_auto_bandwidth_tests-overlayed.png')
-    plot_bandwidth(trunced=True,
-                   pname='speedtest_auto_bandwidth_tests-trunced.png')
-    plot_bandwidth(overlayed=True, trunced=True,
-                   pname='speedtest_auto_bandwidth_tests-overlayed-trunced.png')
+    plot_bandwidth('bandwidth.png')
+    plot_bandwidth('bandwidth-recent.png', trunced=True)
+    plot_bandwidth('tod-bandwidth.png', overlayed=True)
+    plot_bandwidth('tod-bandwidth-recent.png', overlayed=True, trunced=True)  # nopep8
 
     # latency plots
-    plot_ping()
-    plot_ping(overlayed=True,
-              pname='speedtest_auto_latency_tests-overlayed.png')
-    plot_ping(trunced=True,
-              pname='speedtest_auto_latency_tests-trunced.png')
-    plot_ping(overlayed=True, trunced=True,
-              pname='speedtest_auto_latency_tests-overlayed-trunced.png')
+    plot_ping('latency.png')
+    plot_ping('latency-recent.png', trunced=True)
+    plot_ping('tod-latency.png', overlayed=True)
+    plot_ping('tod-latency-recent.png', overlayed=True, trunced=True)  # nopep8
 
 
 def main():
