@@ -153,10 +153,10 @@ def plot_bandwidth(pname, overlayed=False, trunced=False):
     # finish plot
     plt.legend(loc=2)
     if overlayed is False:
-        plt.xlabel('UTC Time (MM-DD HH)')
+        plt.xlabel('Date')
         plt.xlim(strttime, stoptime)
     else:
-        plt.xlabel('UTC Time of Day (Hour)')
+        plt.xlabel('Time of Day (Hour)')
         plt.xlim(0, 24)
         plt.gca().set_xticks(range(25))
 
@@ -252,10 +252,10 @@ def plot_ping(pname, overlayed=False, trunced=False):
     ax2.grid(True)
 
     if overlayed is False:
-        ax2.set_xlabel('UTC Time (MM-DD HH)')
+        ax2.set_xlabel('Date')
         ax2.set_xlim(strttime, stoptime)
     else:
-        ax2.set_xlabel('UTC Time of Day (Hour)')
+        ax2.set_xlabel('Time of Day (Hour)')
         ax2.set_xlim(0, 24)
         ax2.set_xticks(range(25))
 
