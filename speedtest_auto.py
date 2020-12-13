@@ -84,7 +84,9 @@ def dump(site, result_as_str, timestamp=None):
 
 def plot_bandwidth(pname, overlayed=False, trunced=False):
     # make figure
-    plt.figure(figsize=(12, 8))
+    _, axes = plt.subplots(2, 1, figsize=(12, 8),
+                           sharex=True, sharey=True, dpi=300)
+    ax1, ax2 = axes
     # open db and read
     cur = CONN.cursor()
     cur.execute('SELECT date, site, dl_bandwidth, ul_bandwidth FROM tests')
@@ -127,18 +129,20 @@ def plot_bandwidth(pname, overlayed=False, trunced=False):
             tests_site['date'] = [((t - startday).total_seconds() % (60 * 60 * 24))
                                   / (60 * 60) for t in tests_site['date']]  # not great with typing, but works
 
-        # plot
+        # plot download
         if not np.all(np.isnan(tests_site['dl'][cutidx:])):
-            plt.scatter(
+            ax1.scatter(
                 tests_site['date'][cutidx:],
                 tests_site['dl'][cutidx:] / BANDWIDTH_SCALE,
-                label=f'{get_site_name(s)} dl'
+                label=f'{get_site_name(s)} download'
             )
+
+        # plot upload
         if not np.all(np.isnan(tests_site['ul'][cutidx:])):
-            plt.scatter(
+            ax2.scatter(
                 tests_site['date'][cutidx:],
                 tests_site['ul'][cutidx:] / BANDWIDTH_SCALE,
-                label=f'{get_site_name(s)} ul'
+                label=f'{get_site_name(s)} upload'
             )
 
     # plot start/stop time
@@ -151,18 +155,22 @@ def plot_bandwidth(pname, overlayed=False, trunced=False):
     stoptime = tests['date'][-1] + HOUR_DELTA
 
     # finish plot
-    plt.legend(loc=2)
-    if overlayed is False:
-        plt.xlabel('Date')
-        plt.xlim(strttime, stoptime)
-    else:
-        plt.xlabel('Time of Day (Hour)')
-        plt.xlim(0, 24)
-        plt.gca().set_xticks(range(25))
+    ax1.legend(loc=2)
+    ax1.set_ylabel('Throughput (mbps)')
+    ax1.set_ylim(bottom=0)
+    ax1.grid(True)
+    ax2.legend(loc=2)
+    ax2.set_ylabel('Throughput (mbps)')
+    ax2.set_ylim(bottom=0)
+    ax2.grid(True)
 
-    plt.ylabel('Throughput (mbps)')
-    plt.gca().set_ylim(bottom=0)
-    plt.grid()
+    if overlayed is False:
+        ax2.set_xlabel('Date')
+        ax2.set_xlim(strttime, stoptime)
+    else:
+        ax2.set_xlabel('Time of Day (Hour)')
+        ax2.set_xlim(0, 24)
+        ax2.set_xticks(range(25))
 
     plt.tight_layout()
     plt.savefig(pname)
@@ -171,7 +179,7 @@ def plot_bandwidth(pname, overlayed=False, trunced=False):
 
 def plot_ping(pname, overlayed=False, trunced=False):
     # make figure
-    _, axes = plt.subplots(2, 1, figsize=(12, 8), sharex=True)
+    _, axes = plt.subplots(2, 1, figsize=(12, 8), sharex=True, dpi=300)
     ax1, ax2 = axes
     # open db and read
     cur = CONN.cursor()
