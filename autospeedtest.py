@@ -13,8 +13,8 @@ import time
 
 
 if not os.path.exists('speedtests.db'):
-    import speedtest_createdb
-    speedtest_createdb.main()
+    import autospeedtest_createdb
+    autospeedtest_createdb.main()
 # database connection
 CONN = sqlite3.connect('speedtests.db')
 
