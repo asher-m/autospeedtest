@@ -20,6 +20,8 @@ CONN = sqlite3.connect('speedtests.db')
 
 # test params
 PERIOD = 20  # periodicity of tests in minutes
+# minutes until halt file is automatically removed (in case forgotten)
+WAIT_TO_REMOVE = 180
 COMMAND_PROTO = r"speedtest -f json -s {}"  # test command prototype
 SITES = {  # sites to test
     # 1037: 'Portland Otelco',
@@ -294,6 +296,13 @@ def main():
     now = datetime.datetime.now()
     today = now.replace(hour=0, minute=0, second=0, microsecond=0)
     wait_delta = datetime.timedelta(minutes=PERIOD)
+    wait_to_remove_delta = datetime.timedelta(minutes=WAIT_TO_REMOVE)
+
+    # sanity checks
+    # must test more than once per day (timedelta.seconds breaks if not)
+    assert(wait_delta < datetime.timedelta(days=1))
+    # must not try ot remove halt file more than testing
+    assert(wait_delta < wait_to_remove_delta)
 
     # start with a test
     test()
@@ -301,34 +310,36 @@ def main():
 
     # then start testing repeatedly
     while True:
-        # get now again
         now = datetime.datetime.now()
-
-        # calculate how long to wait for until next 20 minute interval and wait
+        # calculate how much time to wait until next interval
         wait = wait_delta - ((now - today) % wait_delta)
-        print(f'Waiting until {now + wait} for next test...')
-        time.sleep(wait.seconds)
-
-        # random waiting time
-        wait_more = random.randint(0, 20 * 60)
-        wait_more_td = datetime.timedelta(seconds=wait_more)
-        print(f'Waiting an additional {wait_more} seconds '
-              f'for random test population (until {now + wait + wait_more_td})...')
-        time.sleep(wait_more)
+        # calculate random waiting time
+        wait_more = datetime.timedelta(
+            seconds=random.randint(0, wait_delta.seconds))
+        print(f'Waiting until {now + wait + wait_more} for next test...')
+        time.sleep(wait.seconds + wait_more.seconds)
 
         # if we shouldn't pause
         if not os.path.exists('./halt'):
             # do the tests again
             test()
             do_plots()
+            pass
         else:
             print('Halt file exists.  Not running test...')
             if not halted:
                 halted = datetime.datetime.now()  # so we know when to delete the halt file
-            time.sleep(3)
-            if datetime.datetime.now() - halted > datetime.timedelta(hours=3):
+
+            if datetime.datetime.now() - halted > datetime.timedelta(minutes=WAIT_TO_REMOVE):
                 halted = None
                 os.remove('./halt')
+            else:
+                w = wait_to_remove_delta - (datetime.datetime.now() - halted)
+                print(f'Waiting for another {w.seconds} seconds '
+                      'until removing halt file...')
+
+        # wait in all cases for good measure (usually problems if not)
+        time.sleep(3)
 
 
 if __name__ == '__main__':
