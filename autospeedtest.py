@@ -134,7 +134,7 @@ def plot_bandwidth(pname, overlayed=False, trunced=False):
             ax1.scatter(
                 tests_site['date'][cutidx:],
                 tests_site['dl'][cutidx:] / BANDWIDTH_SCALE,
-                label=f'{get_site_name(s)} download'
+                label=f'{get_site_name(s)}'
             )
 
         # plot upload
@@ -142,7 +142,7 @@ def plot_bandwidth(pname, overlayed=False, trunced=False):
             ax2.scatter(
                 tests_site['date'][cutidx:],
                 tests_site['ul'][cutidx:] / BANDWIDTH_SCALE,
-                label=f'{get_site_name(s)} upload'
+                label=f'{get_site_name(s)}'
             )
 
     # plot start/stop time
@@ -156,11 +156,11 @@ def plot_bandwidth(pname, overlayed=False, trunced=False):
 
     # finish plot
     ax1.legend(loc=2)
-    ax1.set_ylabel('Throughput (mbps)')
+    ax1.set_ylabel('Download Throughput (mbps)')
     ax1.set_ylim(bottom=0)
     ax1.grid(True)
     ax2.legend(loc=2)
-    ax2.set_ylabel('Throughput (mbps)')
+    ax2.set_ylabel('Upload Throughput (mbps)')
     ax2.set_ylim(bottom=0)
     ax2.grid(True)
 
