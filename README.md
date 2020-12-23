@@ -10,7 +10,7 @@ Most simply, the user can open a `screen` and launch the script to automatically
 $ screen
 $ python autospeedtest.py
 ```
-The script can be stopped at any time by touching `halt` in the script directory, (or the directory from which the script was called.  Touching `halt` will not interrupt a test if it is currently ongoing but it will interrupt any future test until `WAIT_TO_REMOVE` time has passed).
+The script can be stopped at any time by touching `halt` in the script directory, (or the directory from which the script was called.  Touching `halt` will not interrupt a test if it is currently ongoing but it will interrupt any future test until `WAIT_TO_REMOVE` minutes have passed).
 
 
 ### Script options
@@ -18,9 +18,11 @@ The script contains a number of options to allow the user to customize the frequ
 
 The `PERIOD` variable controls the approximate period between tests.  Specifically, the script tries to run a test (or tests) in every `PERIOD`-minute interval throughout the day.  Then, to avoid potential conflict with other scheduled network activities (even others outside the local network), the script adds \[0,`PERIOD`) time before starting the test in each time interval.
 
-The `WAIT_TO_REMOVE` variable specifies how long the script should wait before automatically removing the `halt` file.  This functionality is included in case the user forgets to resume the test.
+The `WAIT_TO_REMOVE` variable specifies how long the script should wait (in minutes) before automatically removing the `halt` file.  This functionality is included in case the user forgets to resume the test.
 
 The `SITES` variable is a dictionary containing the Ookla server IDs and a description of each testing location.  Users can add or remove entries to this dictionary to change the servers with which they test.  For plots, if a server is found in the results database that cannot be found in the `SITES` dictionary, its server ID will be used in its place.
+
+A list of server IDs (useful for the `SITES` variable) can be [found here](https://c.speedtest.net/speedtest-servers-static.php), (this seems to be a list of US Speedtest servers; for other countries YMMV, but Google should be able to help you).  The most useful thing for me has been to go to [speedtest.net](https://www.speedtest.net/), run a few tests on servers that it automatically chooses, and choose the one I like most or that seems to provide the most consistent results.
 
 
 ### Commandline options
@@ -123,4 +125,4 @@ The `autospeedtest_ingestjson.py` is a tool used to migrate old results in json 
 
 
 ## That's all!
-Happy testing, may your ISP's whims be ever in your favor. :wink:
+Happy testing, and may your ISP's whims be ever in your favor. :wink:
