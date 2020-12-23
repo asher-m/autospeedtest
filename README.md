@@ -5,7 +5,7 @@ You'll need [Ookla's Speedtest CLI](https://www.speedtest.net/apps/cli) to use t
 
 
 ## Usage
-Most simply, the user can open a `screen` and launch the script with args to automatically test every 20 minutes and plot, like:
+Most simply, the user can open a `screen` and launch the script to automatically test every 20 minutes and plot, like:
 ```
 $ screen
 $ python autospeedtest.py
