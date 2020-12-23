@@ -92,6 +92,8 @@ The `epoch` option is shown below.  `epoch` is considered the default option so 
 
 This is the first time you're seeing the `epoch` option in any of the plots in this readme!  This is simply because I think it's less representative of overall behavior and therefore less interesting than the `tod` adjusted plots.  The gap in the middle is when I stopped tests for a day and a half for a really large download (a few hundred gigabytes).
 
+Also notice that packetloss results do not appear consistently.  This is because for some reason, Ookla's speedtest-cli doesn't always yield the key in the returned json object, (which itself is likely because there isn't always a packetloss result for some reason).  So be it...as you can see the script will plot either way, (even if there are no packetloss results in some period).
+
 The `tod` option is shown below.  `tod` is considering the adjusting option, so it is appended as `tod-` to the beginning of the filename.
 
 ![tod-latency](https://github.com/asher-m/autospeedtest/raw/master/samples/tod-latency.png)
