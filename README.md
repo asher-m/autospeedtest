@@ -45,7 +45,7 @@ The `autospeedtest_ingestjson.py` is a tool used to migrate old results in json 
 
 
 ## Result Format
-There are 3 switches that allow the user to create plots to show internet experience.
+There are 3 switches that create different plots. Because all plots are created automatically any time anything is plotted, the user shouldn't need to change any of these parameters or options.  (If so, you'll need to modify the script iself.)  All plots are remade when calling `autospeedtest.py -p` from the commandline or when the script plots by itself.
 
 
 ### Result type: `bandwidth` or `latency`
