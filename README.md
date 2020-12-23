@@ -36,13 +36,6 @@ $ python autospeedtest.py -p
 ```
 The user can use these options to set up cron jobs for testing and plotting if leaving open a `screen` is undesireable.
 
-## Other scripts
-This tool also includes two other scripts: `autospeedtest_ingestjson.py` and `autospeedtest_createdb.py`.
-
-The `autospeedtest_createdb.py` script is used to create a database for results.  It is called automatically if a database cannot be found, or if explicitly called it will backup any existing databases before creating a new one.
-
-The `autospeedtest_ingestjson.py` is a tool used to migrate old results in json format to the new database format.
-
 
 ## Result Format
 There are 3 switches that create different plots. Because all plots are created automatically any time anything is plotted, the user shouldn't need to change any of these parameters or options.  (If so, you'll need to modify the script iself.)  All plots are remade when calling `autospeedtest.py -p` from the commandline or when the script plots by itself.
@@ -99,6 +92,35 @@ The `tod` option is shown below.  `tod` is considering the adjusting option, so 
 ![tod-latency](https://github.com/asher-m/autospeedtest/raw/master/samples/tod-latency.png)
 
 Notice again that this was the second plot shown under the `bandwidth` vs `latency` option.  It's just nice to see again.
+
+
+## Database structure
+The sqlite3 database is organized as:
+```
+TABLE tests (
+  date TEXT NOT NULL,
+  site INTEGER,
+  raw TEXT,
+  latency REAL,
+  jitter REAL,
+  dl_bandwidth INTEGER,
+  ul_bandwidth INTEGER,
+  packetloss REAL
+)
+```
+
+You can explore the sample database in the samples directory in the root of this project, but note that I've cleaned the `raw` column from the database because it includes my public IP.
+
+If any other test information is desired, the contents of the `raw` column can be used to access the json object (string) returned by speedtest-cli.
+
+
+## Other scripts
+This tool also includes two other scripts: `autospeedtest_ingestjson.py` and `autospeedtest_createdb.py`.
+
+The `autospeedtest_createdb.py` script is used to create a database for results.  It is called automatically if a database cannot be found, or if explicitly called it will backup any existing databases before creating a new one.
+
+The `autospeedtest_ingestjson.py` is a tool used to migrate old results in json format to the new database format.
+
 
 ## That's all!
 Happy testing, may your ISP's whims be ever in your favor. :wink:
