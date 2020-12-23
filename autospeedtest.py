@@ -12,27 +12,26 @@ import subprocess
 import time
 
 
-if not os.path.exists('speedtests.db'):
-    import autospeedtest_createdb
-    autospeedtest_createdb.main()
-# database connection
-CONN = sqlite3.connect('speedtests.db')
-
-# test params
+# "user-editable" script parameters
 PERIOD = 20  # periodicity of tests in minutes
-# minutes until halt file is automatically removed (in case forgotten)
-WAIT_TO_REMOVE = 180
-COMMAND_PROTO = r"speedtest -f json -s {}"  # test command prototype
+WAIT_TO_REMOVE = 180  # time to wait to remove halt file in minutes
 SITES = {  # sites to test
     # 1037: 'Portland Otelco',
     1774: 'Boston Comcast',
     17193: 'Burlington Telecom'
 }
 
+
+# database connection
+if not os.path.exists('speedtests.db'):
+    import autospeedtest_createdb
+    autospeedtest_createdb.main()
+CONN = sqlite3.connect('speedtests.db')
+# test params
+COMMAND_PROTO = r"speedtest -f json -s {}"  # test command prototype
 # plot params
 BANDWIDTH_SCALE = 1e5  # divide be 1e5 to get mbps
 HOUR_DELTA = datetime.timedelta(hours=1)
-
 # date format
 DATEFORMAT = "%Y-%m-%dT%H-%M-%S"
 
