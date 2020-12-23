@@ -90,7 +90,7 @@ The `epoch` option is shown below.  `epoch` is considered the default option so 
 
 ![latency](https://github.com/asher-m/autospeedtest/raw/master/samples/latency.png)
 
-This is the first time you're seeing the `epoch` option in any of the plots in this readme!  This is simply because I think it's less representative of overall behavior and therefore less interesting than the `tod` adjusted plots.  Take it for what you will-it's there if you want it.
+This is the first time you're seeing the `epoch` option in any of the plots in this readme!  This is simply because I think it's less representative of overall behavior and therefore less interesting than the `tod` adjusted plots.  The gap in the middle is when I stopped tests for a day and a half for a really large download (a few hundred gigabytes).
 
 The `tod` option is shown below.  `tod` is considering the adjusting option, so it is appended as `tod-` to the beginning of the filename.
 
