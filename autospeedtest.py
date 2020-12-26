@@ -329,7 +329,7 @@ def main():
             if not halted:
                 halted = datetime.datetime.now()  # so we know when to delete the halt file
 
-            if datetime.datetime.now() - halted > datetime.timedelta(minutes=WAIT_TO_REMOVE):
+            if datetime.datetime.now() - halted > wait_to_remove_delta:
                 halted = None
                 os.remove('./halt')
             else:
