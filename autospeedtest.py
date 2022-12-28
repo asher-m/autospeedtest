@@ -347,7 +347,7 @@ if __name__ == '__main__':
         ' is to run immediately then again at random times in every 20 minute interval.'
         '  Plots are also made after every test in the default mode.\n\nOptions can be'
         ' used to run one-off tests or plot.\n\nAny arguments are ignored if neither'
-        'a one-off test or plot are indicated.'
+        ' a one-off test or plot are indicated.'
     )
     parser.add_argument('-t', '--test', action='store_true',
                         help='run a one-off test', dest='test')
