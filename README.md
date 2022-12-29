@@ -22,7 +22,7 @@ The `WAIT_TO_REMOVE` variable specifies how long the script should wait (in minu
 
 The `SITES` variable is a dictionary containing the Ookla server IDs and a description of each testing location.  Users can add or remove entries to this dictionary to change the servers with which they test.  For plots, if a server is found in the results database that cannot be found in the `SITES` dictionary, its server ID will be used in its place.
 
-A list of server IDs (useful for the `SITES` variable) can be [found here](https://c.speedtest.net/speedtest-servers-static.php), (this seems to be a list of US Speedtest servers; for other countries YMMV, but Google should be able to help you).  The most useful thing for me has been to go to [speedtest.net](https://www.speedtest.net/), run a few tests on servers that it automatically chooses, and choose the one I like most or that seems to provide the most consistent results.
+A list of server IDs (useful for the `SITES` variable) can be [here](https://williamyaps.github.io/wlmjavascript/servercli.html) or [here](https://c.speedtest.net/speedtest-servers-static.php), (the second link seems to be a list of US Speedtest servers. For other countries YMMV, but Google should be able to help you).  The most useful thing for me has been to go to [speedtest.net](https://www.speedtest.net/), run a few tests on servers that it automatically chooses, and choose the one I like most or that seems to provide the most consistent results.
 
 
 ### Commandline options
